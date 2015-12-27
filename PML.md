@@ -101,15 +101,12 @@ prop.table(table(training$classe))
 ## 0.2843747 0.1935073 0.1743961 0.1638977 0.1838243
 ```
 ###**Data Cleaning**##
-Using  basic data clean-up, we do some data clean-up by removing columns 1 to 6, which are there just for information and reference purposes:
+Using  basic data clean-up tehcnique, we do some data clean-up by removing columns 1 to 6, which are mainly information and reference purpose and removing all columns that are mostly NA:
 
 ```r
 training <- training[, 7:160]
 testing  <- testing[, 7:160]
-```
-and removing all columns that are mostly NA:
 
-```r
 data <- apply(!is.na(training), 2, sum) > 19621  # which is the number of observations
 training <- training[, data]
 testing  <- testing[, data]
@@ -143,7 +140,7 @@ dim(test1)
 ## [1] 5885   54
 ```
 ##**Prediction: Decision Tree**##
-Using ML algorithms method for prediction
+First, we use ML algorithms method for prediction
 
 ```r
 library(rpart)
@@ -152,7 +149,7 @@ library(rattle)
 fancyRpartPlot(modFit1)
 ```
 
-![](Figs/unnamed-chunk-9-1.png) 
+![](Figs/unnamed-chunk-8-1.png) 
 
 ```r
 predictions1 <- predict(modFit1, test1, type = "class")
@@ -193,7 +190,7 @@ confusionMatrix(predictions1, test1$classe)
 ## Balanced Accuracy      0.8933   0.7585   0.8651   0.7859   0.8026
 ```
 ##**Prediction: Random Forest**##
-Using Random Forest method for prediction
+Then, we use Random Forest method for prediction
 
 ```r
 library(randomForest)
@@ -255,4 +252,10 @@ pml_write_files = function(x){
 
 pml_write_files(prediction)
 ```
+
+
+End
+
+
+
 
