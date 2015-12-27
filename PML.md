@@ -233,6 +233,16 @@ confusionMatrix(predictions2, test1$classe)
 ## Balanced Accuracy      0.9999   0.9992   0.9977   0.9953   0.9977
 ```
 
+##**Expected out of sample error**##
+
+Decision Trees gave an Accuracy in the _test1_ dataset of 72.81%
+
+The expected **out-of-sample error** from Decision Trees is 100-72.81 = **<span style="color:red">27.19%</span>**
+
+Random Forests gave an Accuracy in the _test1_ dataset of 99.71%, which was more accurate than the Decision Trees.
+
+The expected **out-of-sample error** from Randrom Fores is 100-99.71 = **<span style="color:red">0.29%</span>**
+
 ##**Project Submission**##
 Base on prediction method use in previous section, Random Forests resulting with better accuracy. Therefore, we use Random Forests with the following formula, which yielded a much better prediction in in-sample:
 
