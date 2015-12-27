@@ -1,0 +1,137 @@
+---
+output: 
+  html_document: 
+    keep_md: yes
+---
+##**Practical Machine Learning Project**
+_Mader_
+
+_December,2015_
+
+
+```{r echo=FALSE, global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=TRUE, warning=FALSE, message=FALSE)
+```
+###**Background Introduction**
+
+These are files from project assignment of Coursera's MOOC Practical Machine Learning from Johns Hopkins University. 
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. 
+
+One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. 
+
+The goal of this project is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. 
+
+More information is available from the website here:(http://groupware.les.inf.puc-rio.br/har)(see the section on the Weight Lifting Exercise Dataset). 
+
+
+###**Data**##
+
+The training data for this project are available here: 
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here: 
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har
+
+First, we download the data from the source
+```{r}
+
+TrainURL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+TestURL<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+```
+
+Then, the data uploaded into R(using Rstudio) and replacing the NA, #DIV/0! and empty fields as NA:
+```{r}
+training <- read.csv(url(TrainURL), na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv(url(TestURL), na.strings=c("NA","#DIV/0!",""))
+
+```
+
+Take a look at the content o the training dataset, and the _classe_ variable which we need to predict with
+```{r}
+str(training, list.len=10)
+```
+```{r}
+table(training$classe)
+```
+Using prop.table to express Table Entries proportions with respect to the different marginal distributions
+```{r}
+prop.table(table(training$user_name, training$classe), 1)
+prop.table(table(training$classe))
+```
+###**Data Cleaning**##
+Using  basic data clean-up tehcnique, we do some data clean-up by removing columns 1 to 6, which are mainly information and reference purpose and removing all columns that are mostly NA:
+```{r}
+training <- training[, 7:160]
+testing  <- testing[, 7:160]
+
+data <- apply(!is.na(training), 2, sum) > 19621  # which is the number of observations
+training <- training[, data]
+testing  <- testing[, data]
+```
+
+
+###**Data Splitting**##
+
+Using Caret packages, the dataset split into two for **cross validation** purposes. We allocated 70% for training & the remainder 30% will be used for test and validation
+
+```{r}
+library(caret)
+
+set.seed(333)
+inTrain <- createDataPartition(y=training$classe, p=0.70, list=FALSE)
+train1  <- training[inTrain,]
+test1  <- training[-inTrain,]
+dim(train1)
+dim(test1)
+```
+##**Prediction: Decision Tree**##
+First, we use ML algorithms method for prediction
+```{r}
+library(rpart)
+modFit1 <- rpart(classe ~ ., data=train1, method="class")
+library(rattle)
+fancyRpartPlot(modFit1)
+predictions1 <- predict(modFit1, test1, type = "class")
+confusionMatrix(predictions1, test1$classe)
+
+```
+##**Prediction: Random Forest**##
+Then, we use Random Forest method for prediction
+```{r}
+library(randomForest)
+modFit2 <- randomForest(classe ~. , data=train1)
+predictions2 <- predict(modFit2, test1, type = "class")
+confusionMatrix(predictions2, test1$classe)
+```
+
+##**Project Submission**##
+Base on prediction method use in previous section, Random Forests resulting with better accuracy. Therefore, we use Random Forests with the following formula, which yielded a much better prediction in in-sample:
+```{r}
+prediction<- predict(modFit2, testing, type = "class")
+```
+Function to generate files with predictions to submit for assignment
+```{r}
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+pml_write_files(prediction)
+```
+
+
+End
+
+
+
+
